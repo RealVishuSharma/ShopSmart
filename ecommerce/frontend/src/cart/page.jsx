@@ -1,45 +1,73 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Search, ShoppingBag, Menu, Minus, Plus, X } from 'lucide-react';
-import sixth from "../assets/sixth.jpg"
-import fourth from "../assets/fourth.jpg";
+import {  Minus, Plus, X } from 'lucide-react';
+import { useSelector , useDispatch} from 'react-redux';
+
 import Header from '../header/page';
+import { getItemSelector, removeFromCart, updatedQuantity } from '../redux/slices/cartSlice';
 
 const CartPage = () => {
-  const [cartItems, setCartItems] = useState([
-    { 
-      id: 1, 
-      name: "Minimal Chair", 
-      price: 299, 
-      quantity: 1,
-      image: sixth
-    },
-    { 
-      id: 2, 
-      name: "Modern Lamp", 
-      price: 159, 
-      quantity: 2,
-      image: fourth
+  const dispatch = useDispatch();
+  const items = useSelector(getItemSelector)
+
+
+  useEffect(() => {
+    const logItems = () => {
+      console.log('Cart Items Updated:', items);
     }
-  ]);
+    logItems();
 
-  const updateQuantity = (id, change) => {
-    setCartItems(items =>
-      items.map(item =>
-        item.id === id
-          ? { ...item, quantity: Math.max(1, item.quantity + change) }
-          : item
-      )
-    );
+    return () => {
+      
+    }
+
+  }, [items]);
+
+
+  const handleRemoveItem = (id) => {
+    dispatch(removeFromCart({id}));
   };
 
-  const removeItem = (id) => {
-    setCartItems(items => items.filter(item => item.id !== id));
+  const handleUpdateQuantity = (id, newQuantity) => {
+    if (newQuantity > 0) {
+      dispatch(updatedQuantity({ id, quantity: newQuantity }));
+    }
   };
 
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  // const [cartItems, setCartItems] = useState([
+    // { 
+    //   id: 1, 
+    //   name: "Minimal Chair", 
+    //   price: 299, 
+    //   quantity: 1,
+    //   image: sixth
+    // },
+    // { 
+    //   id: 2, 
+    //   name: "Modern Lamp", 
+    //   price: 159, 
+    //   quantity: 2,
+    //   image: fourth
+    // }
+  // ]);
+
+  // const updateQuantity = (id, change) => {
+  //   setCartItems(items =>
+  //     items.map(item =>
+  //       item.id === id
+  //         ? { ...item, quantity: Math.max(1, item.quantity + change) }
+  //         : item
+  //     )
+  //   );
+  // };
+
+  // const removeItem = (id) => {
+  //   setCartItems(items => items.filter(item => item.id !== id));
+  // };
+
+  const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const shipping = 15;
   const tax = subtotal * 0.1;
   const total = subtotal + shipping + tax;
@@ -56,7 +84,7 @@ const CartPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-6">
-            {cartItems.map((item) => (
+            {items.map((item) => (
               <Card key={item.id} className="p-6">
                 <div className="flex gap-6">
                   <img 
@@ -73,7 +101,7 @@ const CartPage = () => {
                       <Button 
                         variant="" 
                         size="icon"
-                        onClick={() => removeItem(item.id)}
+                        onClick={() =>  handleRemoveItem(item.id)}
                       >
                         <X className="h-5 w-5" />
                       </Button>
@@ -83,7 +111,7 @@ const CartPage = () => {
                         <Button 
                           variant="" 
                           size="icon"
-                          onClick={() => updateQuantity(item.id, -1)}
+                          onClick={() => { handleUpdateQuantity(item.id, item.quantity - 1)}}
                         >
                           <Minus className="h-4 w-4" />
                         </Button>
@@ -91,7 +119,7 @@ const CartPage = () => {
                         <Button 
                           variant="" 
                           size="icon"
-                          onClick={() => updateQuantity(item.id, 1)}
+                          onClick={() =>  handleUpdateQuantity(item.id, item.quantity + 1)}
                         >
                           <Plus className="h-4 w-4" />
                         </Button>

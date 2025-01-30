@@ -2,10 +2,22 @@ import React from 'react'
 import { Menu, Search, ShoppingBag } from 'lucide-react'
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
+import {useNavigate} from "react-router-dom"
 
 const Header = () => {
+  const navigate = useNavigate();
+
+  const cartPage = () => {
+    navigate("/cart")
+  }
+
+  const login = () => {
+    navigate("/login")
+  }
+
   return (
     <>
+      
       {/* Navigation - Same as HomePage */}
       <nav className="sticky top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b">
         <div className="max-w-[1440px] mx-auto">
@@ -21,8 +33,8 @@ const Header = () => {
                 <a href="#" className="text-sm hover:text-gray-600">Shop</a>
                 <a href="#" className="text-sm hover:text-gray-600">Collections</a>
                 <a href="#" className="text-sm hover:text-gray-600">About</a>
-                <a href="/cart" className="text-sm hover:text-gray-600">Cart</a>
-                <a href="/login" className="text-sm hover:text-gray-600">Login</a>
+                <a  onClick={cartPage}  className="text-sm hover:text-gray-600">Cart</a>
+                <a onClick={login} className="text-sm hover:text-gray-600">Login</a>
               </div>
 
               <div className="flex items-center gap-6">

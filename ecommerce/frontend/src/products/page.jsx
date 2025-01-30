@@ -16,7 +16,7 @@ import fifth from "../assets/fifth.jpg";
 import sixth from "../assets/sixth.jpg";
 import seventh from "../assets/seventh.jpg";
 import eighth from "../assets/eighth.jpg";
-import {useNavigate} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import Header from '../header/page';
 
 
@@ -109,9 +109,9 @@ const ProductsPage = () => {
 
     const navigate = useNavigate();
 
-    const productDetails = () => {
-      navigate("/products/details");
-    }
+    // const productDetails = (products) => {
+    //   navigate(`/products/details/${products.id}`);
+    // }
 
   return (
     <div className="min-h-screen bg-white">
@@ -194,37 +194,41 @@ const ProductsPage = () => {
             </div>
           </div>
 
-          {/* Products Grid */}
-          <div className="flex-1">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredProducts.map((product) => (
-                <Card key={product.id} className="group cursor-pointer border-0 shadow-lg" onClick={productDetails}>
-                  <CardContent className="p-6">
+          {/* // Products Grid / */}
+                <div className="flex-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {filteredProducts.map((product) => (
+                  <Card 
+                    key={product.id} 
+                    className="group cursor-pointer border-0 shadow-lg"
+                    onClick={() => navigate(`/products/${product.id}`, { state: { product: product } })}
+                  >
+                    <CardContent className="p-6">
                     <div className="overflow-hidden rounded-xl mb-6">
                       <img 
-                        src={product.image}
-                        alt={product.name}
-                        className="w-full h-[400px] object-cover transition-transform duration-300 group-hover:scale-105"
+                      src={product.image}
+                      alt={product.name}
+                      className="w-full h-[400px] object-cover transition-transform duration-300 group-hover:scale-105"
                       />
                     </div>
                     <div>
                       <h3 className="text-lg font-medium mb-2">{product.name}</h3>
                       <div className="flex justify-between items-center">
-                        <p className="text-gray-600">${product.price}</p>
-                        <Button variant="" size="icon">
-                          <ShoppingBag className="h-5 w-5 " />
-                        </Button>
+                      <p className="text-gray-600">${product.price}</p>
+                      <Button variant="" size="icon">
+                        <ShoppingBag className="h-5 w-5 " />
+                      </Button>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+                    </CardContent>
+                  </Card>
+                  ))}
+                </div>
+                </div>
+              </div>
+              </div>
 
-      {/* Footer - Same as HomePage */}
+              {/* Footer - Same as HomePage */}
       <footer className="py-16 border-t">
         <div className="max-w-[1440px] mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-12 text-center md:text-left">

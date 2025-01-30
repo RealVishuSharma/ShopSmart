@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search, ShoppingBag, Menu, Minus, Plus, Heart } from 'lucide-react';
+import { Search, ShoppingBag, Menu, Minus, Plus, Heart } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import first from "../assets/first.jpg"
+import { useDispatch, useSelector } from "react-redux";
+import { useLocation } from "react-router-dom";
+
+import { addToCart, getItemSelector, removeFromCart } from "../redux/slices/cartSlice";
+import first from "../assets/first.jpg";
 import second from "../assets/second.jpg";
 import third from "../assets/third.jpg";
 import fourth from "../assets/fourth.jpg";
@@ -12,42 +16,53 @@ import fifth from "../assets/fifth.jpg";
 import sixth from "../assets/sixth.jpg";
 import seventh from "../assets/seventh.jpg";
 import eighth from "../assets/eighth.jpg";
-import Header from '../header/page';
+import Header from "../header/page";
 
 const ProductDetailPage = () => {
+  const dispatch = useDispatch();
   const [quantity, setQuantity] = useState(1);
-  
-  // Mock product data
-  const product = {
-    name: "Minimal Chair",
-    price: 299,
-    description: "Crafted with precision and care, this minimal chair combines comfort with contemporary design. The sleek silhouette and natural materials make it a perfect addition to any modern space.",
-    details: {
-      materials: "Solid oak wood, Premium fabric upholstery",
-      dimensions: "Width: 65cm, Depth: 67cm, Height: 76cm",
-      care: "Wipe clean with a damp cloth, avoid direct sunlight",
-      warranty: "5-year manufacturer warranty"
-    },
-    images: [
-      seventh,
-      sixth,
-      fifth,
-      fourth
-    ],
-    colors: ["Natural Oak", "Dark Walnut", "White Oak"],
-    relatedProducts: [
-      { name: "Modern Lamp", price: 159, image:  first},
-      { name: "Ceramic Vase", price: 89, image: second },
-      { name: "Wooden Table", price: 499, image: third }
-    ]
-  };
+  const location = useLocation();
+  const productDet = location.state?.product;
 
-  const [selectedImage, setSelectedImage] = useState(product.images[0]);
+  // Mock product data
+  const product = productDet
+    ? {
+        id: productDet.id,
+        name: productDet.name,
+        price: productDet.price,
+        image: productDet.image,
+        description:
+          "Crafted with precision and care, this minimal chair combines comfort with contemporary design. The sleek silhouette and natural materials make it a perfect addition to any modern space.",
+        details: {
+          materials: "Solid oak wood, Premium fabric upholstery",
+          dimensions: "Width: 65cm, Depth: 67cm, Height: 76cm",
+          care: "Wipe clean with a damp cloth, avoid direct sunlight",
+          warranty: "5-year manufacturer warranty",
+        },
+        images: [seventh, sixth, fifth, fourth],
+        colors: ["Natural Oak", "Dark Walnut", "White Oak"],
+        relatedProducts: [
+          { name: "Modern Lamp", price: 159, image: first },
+          { name: "Ceramic Vase", price: 89, image: second },
+          { name: "Wooden Table", price: 499, image: third },
+        ],
+      }
+    : {null: null};
+
+  const [selectedImage, setSelectedImage] = useState(product?.images? product.images[0]: null);
+  console.log(selectedImage);
+
+  const cartItems = useSelector(getItemSelector);
+    
+  useEffect(() => {
+      console.log('Current cart items:', cartItems);
+  }, [cartItems]);
+  
 
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation - Keeping the same nav from HomePage for consistency */}
-     <Header/>
+      <Header />
 
       {/* Product Section */}
       <section className="py-16">
@@ -56,23 +71,23 @@ const ProductDetailPage = () => {
             {/* Product Images */}
             <div className="space-y-6">
               <div className="aspect-square overflow-hidden rounded-xl bg-gray-100">
-                <img 
-                  src={eighth} 
+                <img
+                  src={product.image}
                   alt={product.name}
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="grid grid-cols-4 gap-4">
-                {product.images.map((image, index) => (
+                {product.images.map((imageDet, index) => (
                   <button
                     key={index}
-                    onClick={() => setSelectedImage(image)}
+                    onClick={() => setSelectedImage(imageDet)}
                     className={`aspect-square rounded-lg overflow-hidden ${
-                      selectedImage === image ? 'ring-2 ring-black' : ''
+                      selectedImage === imageDet ? "ring-2 ring-black" : ""
                     }`}
                   >
-                    <img 
-                      src={image}
+                    <img
+                      src={imageDet}
                       alt={`${product.name} view ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
@@ -129,10 +144,34 @@ const ProductDetailPage = () => {
 
               {/* Add to Cart */}
               <div className="flex gap-4">
-                <Button className="flex-1 rounded-full py-6 text-lg">
+                <Button
+                  className="flex-1 rounded-full py-6 text-lg"
+                  onClick={() => {
+                    console.log("Adding to cart:", {
+                      id: product.id,
+                      name: product.name,
+                      price: product.price,
+                      image: product.image,
+                      quantity: quantity,
+                    });
+                    dispatch(
+                      addToCart({
+                        id: product.id,
+                        name: product.name,
+                        price: product.price,
+                        image: product.image,
+                        quantity: quantity,
+                      })
+                    );
+                  }}
+                >
                   Add to Cart
                 </Button>
-                <Button variant="outline" size="icon" className="rounded-full border-black">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="rounded-full border-black"
+                >
                   <Heart className="h-5 w-5" />
                 </Button>
               </div>
@@ -146,10 +185,18 @@ const ProductDetailPage = () => {
                 </TabsList>
                 <TabsContent value="details" className="mt-6">
                   <div className="space-y-4 text-gray-600">
-                    <p><strong>Materials:</strong> {product.details.materials}</p>
-                    <p><strong>Dimensions:</strong> {product.details.dimensions}</p>
-                    <p><strong>Care:</strong> {product.details.care}</p>
-                    <p><strong>Warranty:</strong> {product.details.warranty}</p>
+                    <p>
+                      <strong>Materials:</strong> {product.details.materials}
+                    </p>
+                    <p>
+                      <strong>Dimensions:</strong> {product.details.dimensions}
+                    </p>
+                    <p>
+                      <strong>Care:</strong> {product.details.care}
+                    </p>
+                    <p>
+                      <strong>Warranty:</strong> {product.details.warranty}
+                    </p>
                   </div>
                 </TabsContent>
                 <TabsContent value="shipping" className="mt-6">
@@ -172,13 +219,18 @@ const ProductDetailPage = () => {
 
           {/* Related Products */}
           <div className="mt-32">
-            <h2 className="text-3xl font-bold mb-12 text-center">You May Also Like</h2>
+            <h2 className="text-3xl font-bold mb-12 text-center">
+              You May Also Like
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
               {product.relatedProducts.map((item, index) => (
-                <Card key={index} className="group cursor-pointer border-0 shadow-lg">
+                <Card
+                  key={index}
+                  className="group cursor-pointer border-0 shadow-lg"
+                >
                   <CardContent className="p-6">
                     <div className="overflow-hidden rounded-xl mb-6">
-                      <img 
+                      <img
                         src={item.image}
                         alt={item.name}
                         className="w-full h-[400px] object-cover transition-transform duration-300 group-hover:scale-105"
@@ -203,25 +255,43 @@ const ProductDetailPage = () => {
             <div>
               <h3 className="font-bold mb-6 text-lg">Shop</h3>
               <div className="space-y-4">
-                <a href="#" className="block text-gray-600 hover:text-gray-900">New Arrivals</a>
-                <a href="#" className="block text-gray-600 hover:text-gray-900">Best Sellers</a>
-                <a href="#" className="block text-gray-600 hover:text-gray-900">Collections</a>
+                <a href="#" className="block text-gray-600 hover:text-gray-900">
+                  New Arrivals
+                </a>
+                <a href="#" className="block text-gray-600 hover:text-gray-900">
+                  Best Sellers
+                </a>
+                <a href="#" className="block text-gray-600 hover:text-gray-900">
+                  Collections
+                </a>
               </div>
             </div>
             <div>
               <h3 className="font-bold mb-6 text-lg">About</h3>
               <div className="space-y-4">
-                <a href="#" className="block text-gray-600 hover:text-gray-900">Our Story</a>
-                <a href="#" className="block text-gray-600 hover:text-gray-900">Careers</a>
-                <a href="#" className="block text-gray-600 hover:text-gray-900">Press</a>
+                <a href="#" className="block text-gray-600 hover:text-gray-900">
+                  Our Story
+                </a>
+                <a href="#" className="block text-gray-600 hover:text-gray-900">
+                  Careers
+                </a>
+                <a href="#" className="block text-gray-600 hover:text-gray-900">
+                  Press
+                </a>
               </div>
             </div>
             <div>
               <h3 className="font-bold mb-6 text-lg">Support</h3>
               <div className="space-y-4">
-                <a href="#" className="block text-gray-600 hover:text-gray-900">FAQ</a>
-                <a href="#" className="block text-gray-600 hover:text-gray-900">Shipping</a>
-                <a href="#" className="block text-gray-600 hover:text-gray-900">Returns</a>
+                <a href="#" className="block text-gray-600 hover:text-gray-900">
+                  FAQ
+                </a>
+                <a href="#" className="block text-gray-600 hover:text-gray-900">
+                  Shipping
+                </a>
+                <a href="#" className="block text-gray-600 hover:text-gray-900">
+                  Returns
+                </a>
               </div>
             </div>
             <div>
